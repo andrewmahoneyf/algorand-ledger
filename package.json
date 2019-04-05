@@ -1,0 +1,20 @@
+{
+    "name": "algokeyjs",
+    "version": "1.0.0",
+    "keywords": [
+        "util",
+        "functional",
+        "server",
+        "client",
+        "browser"
+    ],
+    "author": "adji",
+    "contributors": [],
+    "dependencies": {
+        "@ledgerhq/hw-transport-node-hid": "^4.48.0",
+        "algosdk": "^1.0.5",
+        "argparse": "^1.0.10",
+        "babel-polyfill": "^6.26.0",
+        "bn.js": "^4.11.8"
+    }
+}
