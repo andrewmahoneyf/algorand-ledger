@@ -1,10 +1,6 @@
 #!/usr/bin / env node
 /* global module */
 'use strict';
-const algosdk = require("algosdk");
-const nacl = require('algosdk/src/nacl/naclWrappers');
-const address = require('algosdk/src/encoding/address');
-const fs = require('fs');
 const common = require('./common');
 
 function prepare_key_reg_transaction(votepk, vrfpk, fee, firstBlock, publicKeys, lastBlock, note) {

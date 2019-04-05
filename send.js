@@ -3,11 +3,9 @@
 'use strict';
 const algosdk = require("algosdk");
 const fs = require('fs');
-
 const txnBuilder = require('algosdk/src/transaction');
 const encoding = require("algosdk/src/encoding/encoding");
 const address = require('algosdk/src/encoding/address');
-const nacl = require('algosdk/src/nacl/naclWrappers');
 const client = require('algosdk/src/client/client');
 const base32 = require('hi-base32');
 const common = require('./common');

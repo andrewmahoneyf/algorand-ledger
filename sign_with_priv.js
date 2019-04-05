@@ -1,7 +1,6 @@
 #!/usr/bin / env node
 /* global module */
 'use strict';
-const algosdk = require("algosdk");
 const fs = require('fs');
 const address = require('algosdk/src/encoding/address');
 const encoding = require("algosdk/src/encoding/encoding");
