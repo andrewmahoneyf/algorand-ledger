@@ -16,9 +16,11 @@ My ledger public address:
 Some of the addresses generated with algokey:
 OPH5MFQSAEDCJDSG7ZROACLHFDLQEDW4DFB75BJ5342EPX24APOID6Q2LQ
 3YTLLBUEODAAVQSAZ7MTADKKXUWOUJCBLCOFI2UIHA6OEX4E23TO5O4RWI
-Requirements
-NodeJS
-Run ‘npm install’ in the directory where the scripts are located 
+
+## Requirements
+* NodeJS
+* Git
+* Run ‘npm install’ in the directory where the scripts are located 
 
 ## Usage
 
