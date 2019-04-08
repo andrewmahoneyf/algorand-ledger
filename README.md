@@ -1,5 +1,6 @@
 # Algorand Ledger #
 Scripts to sign transaction in Algorand Blockchain using ledger.
+Stay tunned @algo_fabrik
 
 ## Requirements ##
 * NodeJS
