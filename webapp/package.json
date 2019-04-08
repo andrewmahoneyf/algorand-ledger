@@ -1,0 +1,20 @@
+{
+  "name": "algokey-webapp",
+  "version": "1.0.0",
+  "description": "WebApp to sign algorand transactions with ledger",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "budo index.js:bundle.js --live  --ssl --cors",
+    "build": "browserify main.js > bundle.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@ledgerhq/hw-transport-webusb": "^4.48.0",
+    "algosdk": "^1.0.5",
+    "babel-polyfill": "^6.26.0",
+    "browserify": "^16.2.3",
+    "budo": "^11.6.2"
+  }
+}
