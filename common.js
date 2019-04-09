@@ -3,9 +3,11 @@
 'use strict';
 const algosdk = require("algosdk");
 const nacl = require('algosdk/src/nacl/naclWrappers');
+const encoding = require("algosdk/src/encoding/encoding");
 const address = require('algosdk/src/encoding/address');
 const base32 = require('hi-base32');
 const BN = require('bn.js');
+const txnBuilder = require('algosdk/src/transaction');
 const fs = require('fs');
 const  GENESIS_ID = "testnet-v31.0";
 
@@ -40,7 +42,7 @@ function getPublic(fileOrPk) {
 }
 
 function _validateTX(transaction) {
-    console.error("Transaction:", JSON.stringify(transaction, null, 4));
+    //console.error("Transaction:", JSON.stringify(transaction, null, 4));
     if (typeof transaction !== "object") {
         throw new Error("Invalid transaction data");
     }
@@ -144,13 +146,14 @@ async function ledger_sign(transport, txn) {
     msg.push(Buffer.from(Buffer.from(address.decode(txn["from"]).publicKey)));
     //apdu += struct.pack("32s", intx.get('snd', ""))
     // littel-indian, 8 bytes
-    msg.push(new BN(txn['fee']).toBuffer('le', 8));
-    msg.push(new BN(txn['firstRound']).toBuffer('le', 8));
-    msg.push(new BN(txn['lastRound']).toBuffer('le', 8));
+
+    msg.push(new BN(txn['fee']).toArrayLike(Buffer, 'le', 8));
+    msg.push(new BN(txn['firstRound']).toArrayLike(Buffer, 'le', 8));
+    msg.push(new BN(txn['lastRound']).toArrayLike(Buffer, 'le', 8));
     msg.push(_paddedBuf(txn['genesisID'], 32));
     if (txType === 'pay') {
         msg.push(Buffer.from(address.decode(txn["to"]).publicKey));
-        msg.push(new BN(txn['amount']).toBuffer('le', 8));
+        msg.push(new BN(txn['amount']).toArrayLike(Buffer, 'le', 8));
         // When CloseRemainderTo is set, it indicates that the
         // transaction is requesting that the account should be
         // closed, and all remaining funds be transferred to this
@@ -167,6 +170,105 @@ async function ledger_sign(transport, txn) {
     return base32.encode(signature);
 }
 
+function prepare_transaction(to, amount, fee, firstBlock, publicKeys, lastBlock, note) {
+    var from;
+    var msig = {};
+    if (typeof publicKeys === "object"
+            && "pks" in publicKeys
+            && "version" in publicKeys
+            && "threshold" in publicKeys
+            && Array.isArray(publicKeys["pks"])
+            && publicKeys["pks"].length > 1) {
+        const version = parseInt(publicKeys["version"]);
+        const threshold = parseInt(publicKeys["threshold"]);
+        try {
+            from = get_multisig_addr(publicKeys["pks"], version, threshold);
+        } catch (e) {
+            console.error("Error generating multisig address", e);
+            from = "multisig addr";
+        }
+        msig = {msig: {
+                subsig: publicKeys["pks"].map(a => ({pk: a})),
+                threshold: threshold,
+                version: version
+            }
+        };
+    } else {
+        if (Array.isArray(publicKeys)) {
+            if (publicKeys.length === 1) {
+                from = publicKeys[0];
+            }
+        } else {
+            from = publicKeys;
+        }
+    }
+    if (!from) {
+        throw new Error("invalid publicKey");
+    }
+    return {
+        txn: {
+            type: 'pay',
+            from: from,
+            to: to,
+            fee: fee,
+            amount: amount,
+            firstRound: firstBlock,
+            lastRound: lastBlock ? lastBlock : firstBlock + 1000,
+            note: note,
+            genesisID: GENESIS_ID
+        },
+        ...msig
+    };
+}
+function getStxn(transaction) {
+    console.error("Transaction", transaction);
+    const txn = transaction['txn'];
+    if (!("note" in txn)) {
+        txn["note"] = "";
+    }
+    txn["note"] = new Uint8Array(Buffer.from(txn["note"]));
+    const algoTxn = new txnBuilder.Transaction(txn);
+    const encodedAlgoTxn = algoTxn.get_obj_for_encoding();
+    const encodedMsg = encoding.encode(encodedAlgoTxn);
+    const toBeSigned = Buffer.concat([algoTxn.tag, encodedMsg]);
+
+    if ("sig" in transaction) {
+        let sig = base32.decode.asBytes(transaction['sig']);
+        return {
+            "sig": Buffer.from(sig),
+            "txn": encodedAlgoTxn
+        };
+    } else if ("msig" in transaction
+            && typeof transaction['msig'] === "object"
+            && "subsig" in transaction['msig']
+            && Array.isArray(transaction['msig']['subsig'])
+            && transaction['msig']['subsig'].length > 1)
+    {
+        let msig = transaction['msig'];
+        let subsig = msig['subsig'];
+        const fromAddr = common.get_multisig_addr(subsig.map(k => (k['pk'])), msig["version"], msig["threshold"]);
+        if (txn["from"] !== fromAddr) {
+            throw new Error("from address must match multsig address " + fromAddr);
+        }
+        return {
+            "msig": {
+                subsig: subsig.map(k => {
+                    let ret = {pk: Buffer.from(address.decode(k['pk']).publicKey)};
+                    if (k['sig']) {
+                        ret['s'] = Buffer.from(base32.decode.asBytes(k['sig']));
+                    }
+                    return ret;
+                }),
+                thr: msig["threshold"],
+                v: msig["version"]
+            },
+            "txn": encodedAlgoTxn
+        };
+    }
+    throw new Error("Invalid signature in transaction");
+}
+
+
 module.exports = {
     get_multisig_addr,
     getPublic,
@@ -174,5 +276,7 @@ module.exports = {
     GENESIS_ID,
     ledger_sign,
     ledger_get_pub_addr,
-    ledger_exchange
+    ledger_exchange,
+    prepare_transaction,
+    getStxn
 };
