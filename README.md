@@ -1,6 +1,6 @@
 # Algorand Ledger #
 Scripts to sign transaction in Algorand Blockchain using ledger.
-Stay tunned @algo_fabrik
+Stay tunned @algofabrik
 
 ## Requirements ##
 * Set your Ledger Nano firmware to: https://github.com/algorand/ledger-app-algorand
