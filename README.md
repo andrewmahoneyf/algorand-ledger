@@ -55,23 +55,6 @@ Then it signs the transaction.
 ```node send.js server_token server_ip server_port [tx_input_file]```
 This scripts take the transaction from stdinput or read it from tx_input_file and then it publish it in the network returning the transaction id.
 
-
-## Examples ##
-
-### Single signature ###
-node prepare_transaction.js 3YTLLBUEODAAVQSAZ7MTADKKXUWOUJCBLCOFI2UIHA6OEX4E23TO5O4RWI 1233 100 288206 KKNXJL6OIIPIAOKHK62UMJAI7LCFXXGTIUZNDQIBDN6LFBNT7VQNIGHACY | node sign_with_ledger.js | node send.js 7fa7c128461e1486619e2b33542da289b85b2eec54d6800abe169c5cc1bdc063 10.10.0.85 8080
-
-Resulting transaction:
-https://algoexplorer.com/tx/RNX5GWIIBZA277AC5JDUQIBFCPSEOOG7SS4J45IVNGAQ72FEBDYA
-
-### Multi signature ###
-node prepare_transaction.js 3YTLLBUEODAAVQSAZ7MTADKKXUWOUJCBLCOFI2UIHA6OEX4E23TO5O4RWI 1233 100 272001 Z6IMXKHPUNR4YVDTNSYDLE4DGBRRU7VLAY4NOQ2JEEZBTCKJ72KSVX7TE4 OPH5MFQSAEDCJDSG7ZROACLHFDLQEDW4DFB75BJ5342EPX24APOID6Q2LQ J4GGCZW7JA5NKQDX4U5TRX4AR7YPNZRX7VQ44YCUJ3BYEEO72KEKKWVNBM  | node sign_with_ledger.js | node sign_with_priv.js key.priv | node send.js 7fa7c128461e1486619e2b33542da289b85b2eec54d6800abe169c5cc1bdc063 10.10.0.85 8080
-
-The resulting transaction:
-http://algoexplorer.com/tx/J2NYPVZBZJZRQWPO7DBKRGBKVH22XDO4MTJWIGL657JYHO35MJHA
-
-
-
 ## How it works TLDR; ##
 
 The scripts uses Json to encode the transaction data. 
@@ -176,3 +159,16 @@ For example after a signature we get:
 
 Finally the send script uses the algorand node rest api to send the transaction to the network.
 
+## Examples ##
+
+### Single signature ###
+node prepare_transaction.js 3YTLLBUEODAAVQSAZ7MTADKKXUWOUJCBLCOFI2UIHA6OEX4E23TO5O4RWI 1233 100 288206 KKNXJL6OIIPIAOKHK62UMJAI7LCFXXGTIUZNDQIBDN6LFBNT7VQNIGHACY | node sign_with_ledger.js | node send.js 7fa7c128461e1486619e2b33542da289b85b2eec54d6800abe169c5cc1bdc063 10.10.0.85 8080
+
+Resulting transaction:
+https://algoexplorer.com/tx/RNX5GWIIBZA277AC5JDUQIBFCPSEOOG7SS4J45IVNGAQ72FEBDYA
+
+### Multi signature ###
+node prepare_transaction.js 3YTLLBUEODAAVQSAZ7MTADKKXUWOUJCBLCOFI2UIHA6OEX4E23TO5O4RWI 1233 100 272001 Z6IMXKHPUNR4YVDTNSYDLE4DGBRRU7VLAY4NOQ2JEEZBTCKJ72KSVX7TE4 OPH5MFQSAEDCJDSG7ZROACLHFDLQEDW4DFB75BJ5342EPX24APOID6Q2LQ J4GGCZW7JA5NKQDX4U5TRX4AR7YPNZRX7VQ44YCUJ3BYEEO72KEKKWVNBM  | node sign_with_ledger.js | node sign_with_priv.js key.priv | node send.js 7fa7c128461e1486619e2b33542da289b85b2eec54d6800abe169c5cc1bdc063 10.10.0.85 8080
+
+The resulting transaction:
+http://algoexplorer.com/tx/J2NYPVZBZJZRQWPO7DBKRGBKVH22XDO4MTJWIGL657JYHO35MJHA
