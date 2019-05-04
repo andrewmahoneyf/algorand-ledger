@@ -3,32 +3,27 @@ Scripts to sign transaction in Algorand Blockchain using ledger.
 Stay tunned @algofabrik
 
 ## Requirements ##
-* Set your Ledger Nano firmware to: https://github.com/algorand/ledger-app-algorand
+* Algorand Ledger Nano firmware: https://github.com/algorand/ledger-app-algorand
 * NodeJS
 * Git
-* Run ‘npm install’ in the directory where the scripts are located 
 
 ## Installation ##
 The scripts use node and npm.
 
-- Install node in your machine. 
+- Install node
 - Clone the repository ```git clone https://github.com/CoinFabrik/algorand-ledger```.
-- Change to the cloned directory ```cd algorand-ledger```.
-- Install dependencies ```npm install```.
-- Read the usage section for instructions on how to use the scripts.
-
-To use the ledger device to sign a transaction the algorand app for ledger must be
-installed in the device, see: [ledger-app-algorand](https://github.com/algorand/ledger-app-algorand)
-
+- Switch to the cloned directory ```cd algorand-ledger```
+- Install dependencies ```npm install```
+- Read the usage section for instructions on how to use the scripts
 
 ## Usage ##
 The process of sending a transaction is done in three steps:
 
-1. Create the transaction using the prepare_transaction.js script.
-2. Sign the transaction. There are two alternative: sign_with_ledger.js uses the ledger to sign, sign_with_priv.js can use a private key generate by algokey tool and saved in a file.
-3. Send the transaction to the network. Use the send.js script.
+1. Create the transaction using the prepare_transaction.js script
+2. Sign the transaction. There are two alternative: sign_with_ledger.js uses the ledger to sign, sign_with_priv.js can use a private key generate by algokey tool and saved in a file
+3. Send the transaction to the network. Use the send.js script
 
-Scripts:
+## Scripts ##
 
 * Prepare_transaction.js is the first script that you need to run is: 
 ```node prepare_transaction.js to amount fee firstblock [pks | pks... threshold]```
