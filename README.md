@@ -37,9 +37,9 @@ Where:
 This script prints a json with the information to be signed. The json can be saved to a file or using a pipe pass it to some of the signing scripts.
 
 * Sign_with_ledger.js
-```node sign_with_ledger.js```
-This script read the public address from the ledger app check the from field (or some pk in the case of a multisignature). 
-Then it sends the transaction to the ledger and sign it.
+```node sign_with_ledger.js transaction```
+This script reads the public address from the ledger app, check the from field (or some pk in the case of a multisignature) and 
+sends the transaction to the ledger and sign it.
 
 * Sign_with_priv.js 
 ```node sign_with_priv.js priv_filename```
