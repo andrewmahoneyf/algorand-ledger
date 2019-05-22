@@ -48,51 +48,6 @@ function prepare_key_reg_transaction(votepk, vrfpk, fee, firstBlock, publicKeys,
     };
 }
 
-function prepare_transaction(to, amount, fee, firstBlock, publicKeys, lastBlock, note) {
-    var from;
-    var msig = {};
-    if (typeof publicKeys === "object"
-            && "pks" in publicKeys
-            && "version" in publicKeys
-            && "threshold" in publicKeys
-            && Array.isArray(publicKeys["pks"])
-            && publicKeys["pks"].length > 1) {
-        const version = parseInt(publicKeys["version"]);
-        const threshold = parseInt(publicKeys["threshold"]);
-        from = common.get_multisig_addr(publicKeys["pks"], version, threshold);
-        msig = {msig: {
-                subsig: publicKeys["pks"].map(a => ({pk: a})),
-                threshold: threshold,
-                version: version
-            }
-        };
-    } else {
-        if (Array.isArray(publicKeys)) {
-            if (publicKeys.length === 1) {
-                from = publicKeys[0];
-            }
-        } else {
-            from = publicKeys;
-        }
-    }
-    if (!from) {
-        throw new Error("invalid publicKey");
-    }
-    return {
-        txn: {
-            type: 'pay',
-            from: from,
-            to: to,
-            fee: fee,
-            amount: amount,
-            firstRound: firstBlock,
-            lastRound: lastBlock ? lastBlock : firstBlock + 1000,
-            note: note,
-            genesisID: common.GENESIS_ID
-        },
-        ...msig
-    };
-}
 
 if (!module.parent) {
     if (process.argv.length < 6) {
@@ -120,6 +75,6 @@ if (!module.parent) {
             threshold: threshold
         };
     }
-    const txn = prepare_transaction(to, amount, fee, firstBlock, publicKeys);
+    const txn = common.prepare_transaction(to, amount, fee, firstBlock, publicKeys);
     console.log(JSON.stringify(txn, null, 4));
 }

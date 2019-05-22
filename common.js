@@ -3,11 +3,13 @@
 'use strict';
 const algosdk = require("algosdk");
 const nacl = require('algosdk/src/nacl/naclWrappers');
+const encoding = require("algosdk/src/encoding/encoding");
 const address = require('algosdk/src/encoding/address');
 const base32 = require('hi-base32');
 const BN = require('bn.js');
+const txnBuilder = require('algosdk/src/transaction');
 const fs = require('fs');
-const  GENESIS_ID = "testnet-v31.0";
+const GENESIS_ID = "testnet-v31.0";
 
 
 function get_multisig_addr(pks, version, threshold) {
@@ -40,7 +42,7 @@ function getPublic(fileOrPk) {
 }
 
 function _validateTX(transaction) {
-    console.error("Transaction:", JSON.stringify(transaction, null, 4));
+    //console.error("Transaction:", JSON.stringify(transaction, null, 4));
     if (typeof transaction !== "object") {
         throw new Error("Invalid transaction data");
     }
@@ -144,13 +146,14 @@ async function ledger_sign(transport, txn) {
     msg.push(Buffer.from(Buffer.from(address.decode(txn["from"]).publicKey)));
     //apdu += struct.pack("32s", intx.get('snd', ""))
     // littel-indian, 8 bytes
-    msg.push(new BN(txn['fee']).toBuffer('le', 8));
-    msg.push(new BN(txn['firstRound']).toBuffer('le', 8));
-    msg.push(new BN(txn['lastRound']).toBuffer('le', 8));
+
+    msg.push(new BN(txn['fee']).toArrayLike(Buffer, 'le', 8));
+    msg.push(new BN(txn['firstRound']).toArrayLike(Buffer, 'le', 8));
+    msg.push(new BN(txn['lastRound']).toArrayLike(Buffer, 'le', 8));
     msg.push(_paddedBuf(txn['genesisID'], 32));
     if (txType === 'pay') {
         msg.push(Buffer.from(address.decode(txn["to"]).publicKey));
-        msg.push(new BN(txn['amount']).toBuffer('le', 8));
+        msg.push(new BN(txn['amount']).toArrayLike(Buffer, 'le', 8));
         // When CloseRemainderTo is set, it indicates that the
         // transaction is requesting that the account should be
         // closed, and all remaining funds be transferred to this
@@ -166,8 +169,6 @@ async function ledger_sign(transport, txn) {
     const signature = await ledger_exchange(transport, toSign);
     return base32.encode(signature);
 }
-
-
 
 function prepare_transaction(to, amount, fee, firstBlock, publicKeys, lastBlock, note) {
     var from;
@@ -276,5 +277,7 @@ module.exports = {
     GENESIS_ID,
     ledger_sign,
     ledger_get_pub_addr,
-    ledger_exchange
+    ledger_exchange,
+    prepare_transaction,
+    getStxn
 };
