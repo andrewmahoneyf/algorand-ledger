@@ -52,10 +52,10 @@ function _validateTX(transaction) {
 
 function _isMultiSig(transaction) {
     return ("msig" in transaction
-            && typeof transaction['msig'] === "object"
-            && "subsig" in transaction['msig']
-            && Array.isArray(transaction['msig']['subsig'])
-            && transaction['msig']['subsig'].length > 1);
+        && typeof transaction['msig'] === "object"
+        && "subsig" in transaction['msig']
+        && Array.isArray(transaction['msig']['subsig'])
+        && transaction['msig']['subsig'].length > 1);
 }
 
 async function signTX(addr, transaction, _sign) {
@@ -127,7 +127,7 @@ async function ledger_exchange(transport, val) {
 
 async function ledger_get_pub_addr(transport) {
     const addr = await ledger_exchange(transport, Buffer.from("8003000000", 'hex'));
-    return  address.encode(addr);
+    return address.encode(addr);
 }
 
 async function ledger_sign(transport, txn) {
@@ -166,6 +166,108 @@ async function ledger_sign(transport, txn) {
     const signature = await ledger_exchange(transport, toSign);
     return base32.encode(signature);
 }
+
+
+
+function prepare_transaction(to, amount, fee, firstBlock, publicKeys, lastBlock, note) {
+    var from;
+    var msig = {};
+    if (typeof publicKeys === "object"
+        && "pks" in publicKeys
+        && "version" in publicKeys
+        && "threshold" in publicKeys
+        && Array.isArray(publicKeys["pks"])
+        && publicKeys["pks"].length > 1) {
+        const version = parseInt(publicKeys["version"]);
+        const threshold = parseInt(publicKeys["threshold"]);
+        try {
+            from = get_multisig_addr(publicKeys["pks"], version, threshold);
+        } catch (e) {
+            console.error("Error generating multisig address", e);
+            from = "multisig addr";
+        }
+        msig = {
+            msig: {
+                subsig: publicKeys["pks"].map(a => ({pk: a})),
+                threshold: threshold,
+                version: version
+            }
+        };
+    } else {
+        if (Array.isArray(publicKeys)) {
+            if (publicKeys.length === 1) {
+                from = publicKeys[0];
+            }
+        } else {
+            from = publicKeys;
+        }
+    }
+    if (!from) {
+        throw new Error("invalid publicKey");
+    }
+    return {
+        txn: {
+            type: 'pay',
+            from: from,
+            to: to,
+            fee: fee,
+            amount: amount,
+            firstRound: firstBlock,
+            lastRound: lastBlock ? lastBlock : firstBlock + 1000,
+            note: note,
+            genesisID: GENESIS_ID
+        },
+        ...msig
+    };
+}
+
+function getStxn(transaction) {
+    console.error("Transaction", transaction);
+    const txn = transaction['txn'];
+    if (!("note" in txn) || !txn["note"]) {
+        txn["note"] = "";
+    }
+    txn["note"] = new Uint8Array(Buffer.from(txn["note"]));
+    const algoTxn = new txnBuilder.Transaction(txn);
+    const encodedAlgoTxn = algoTxn.get_obj_for_encoding();
+    const encodedMsg = encoding.encode(encodedAlgoTxn);
+    const toBeSigned = Buffer.concat([algoTxn.tag, encodedMsg]);
+
+    if ("sig" in transaction) {
+        let sig = base32.decode.asBytes(transaction['sig']);
+        return {
+            "sig": Buffer.from(sig),
+            "txn": encodedAlgoTxn
+        };
+    } else if ("msig" in transaction
+        && typeof transaction['msig'] === "object"
+        && "subsig" in transaction['msig']
+        && Array.isArray(transaction['msig']['subsig'])
+        && transaction['msig']['subsig'].length > 1) {
+        let msig = transaction['msig'];
+        let subsig = msig['subsig'];
+        const fromAddr = get_multisig_addr(subsig.map(k => (k['pk'])), msig["version"], msig["threshold"]);
+        if (txn["from"] !== fromAddr) {
+            throw new Error("from address must match multsig address " + fromAddr);
+        }
+        return {
+            "msig": {
+                subsig: subsig.map(k => {
+                    let ret = {pk: Buffer.from(address.decode(k['pk']).publicKey)};
+                    if (k['sig']) {
+                        ret['s'] = Buffer.from(base32.decode.asBytes(k['sig']));
+                    }
+                    return ret;
+                }),
+                thr: msig["threshold"],
+                v: msig["version"]
+            },
+            "txn": encodedAlgoTxn
+        };
+    }
+    throw new Error("Invalid signature in transaction");
+}
+
 
 module.exports = {
     get_multisig_addr,
