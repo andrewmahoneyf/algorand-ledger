@@ -28,7 +28,6 @@ function print(obj, isAlgorand, stack) {
                     console.log(stack, "Genesis block:", obj[property]);
                 } else if (property == "rcv" && Buffer.isBuffer(obj[property])) {
                     console.log(stack, "Receiver Address:", printAddr(obj[property]));
-                    console.log(stack, "Receiver Address:", printAddr(obj[property]));
                 } else if (property == "snd" && Buffer.isBuffer(obj[property])) {
                     console.log(stack, "Sender Address:", printAddr(obj[property]));
                 } else if (property == "subsig") {
