@@ -63,6 +63,7 @@ function print(obj, isAlgorand, stack) {
             if (property == "txn") {
                 console.log("Algorand transaction");
                 print(obj[property], true, stack + "    ");
+                console.log("-".repeat(80));
             } else if (property == "msig") {
                 console.log("Algorand multisig");
                 print(obj[property], true, stack + "    ");
@@ -91,7 +92,6 @@ const d = fs.readFileSync(fileName);
 var encodeStream = msgpack.createDecodeStream();
 encodeStream.on("data", (decoded) => {
     print(decoded, false, '')
-    process.exit();
 });
 encodeStream.write(d);
 encodeStream.end();
